@@ -16,7 +16,7 @@ builder.Services.AddAkka("BlazorActorSystem", configurationBuilder =>
     .WithActors((system, registry) =>
     {
         var props = Akka.DependencyInjection.DependencyResolver.For(system).Props<CounterActor>();
-        system.ActorOf(props);
+        system.ActorOf(props, "counterActor");
     });
 });
 var app = builder.Build();
