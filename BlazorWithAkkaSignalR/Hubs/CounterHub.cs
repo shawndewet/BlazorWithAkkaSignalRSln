@@ -6,7 +6,7 @@ namespace BlazorWithAkkaSignalR.Hubs
     {
         public async Task IncrementCounter()
         {
-            await Clients.All.SendAsync("IncrementCounter","incremented manually");
+            await Clients.All.SendAsync("IncrementCounter","incremented via SignalR");
         }
     }
 }

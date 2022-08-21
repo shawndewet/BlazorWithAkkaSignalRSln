@@ -7,10 +7,14 @@ namespace BlazorWithAkkaSignalR.Actors
 {
     public class CounterActor : ReceiveActor
     {
-        private sealed class IncrementCounter
+        public sealed class IncrementCounter
         {
-            public static readonly IncrementCounter Instance = new IncrementCounter();
-            private IncrementCounter() { }
+            public IncrementCounter(string message)
+            {
+                Message = message;
+            }
+
+            public string Message { get; }
         }
 
         private ILoggingAdapter _logger = Context.GetLogger();
@@ -29,15 +33,14 @@ namespace BlazorWithAkkaSignalR.Actors
             Receive<IncrementCounter>(async msg =>
             {
                 _logger.Info("IncrementCounter");
-                await _hubContext.Clients.All.SendAsync("IncrementCounter", "incremented by Akka Actor");
+                await _hubContext.Clients.All.SendAsync("IncrementCounter", msg.Message);
             });
         }
 
         protected override void PreStart()
         {
-            //set up a timer to send IncrementCounter message every so many seconds
-            var seconds = 5000;
-            timer = Context.System.Scheduler.ScheduleTellRepeatedlyCancelable(seconds, seconds, Self, IncrementCounter.Instance, ActorRefs.NoSender);
+            var ms = 5000;
+            timer = Context.System.Scheduler.ScheduleTellRepeatedlyCancelable(ms, ms, Self, new IncrementCounter("via Timer"), ActorRefs.NoSender);
 
             base.PreStart();
         }
