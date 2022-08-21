@@ -1,3 +1,5 @@
+using Akka.Hosting;
+using BlazorWithAkkaSignalR.Actors;
 using BlazorWithAkkaSignalR.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -8,7 +10,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
-
+builder.Services.AddAkka("BlazorActorSystem", configurationBuilder =>
+{
+    configurationBuilder
+    .WithActors((system, registry) =>
+    {
+        var props = Akka.DependencyInjection.DependencyResolver.For(system).Props<CounterActor>();
+        system.ActorOf(props);
+    });
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
