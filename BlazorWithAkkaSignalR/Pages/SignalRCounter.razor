@@ -1,18 +1,25 @@
-﻿@page "/counter"
+﻿@page "/signalrcounter"
 @using Microsoft.AspNetCore.SignalR.Client
 @inject NavigationManager NavigationManager
 @implements IAsyncDisposable
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Incrementing Counter</PageTitle>
 
-<h1>Counter</h1>
+<h1>Counter incremented via SignalR</h1>
+<p>Open this view in a different browser tab from the /counter view.  When that view's Increment button is clicked, this view's counter is incremented</p>
 
 <p role="status">Current count: @currentCount</p>
 
-<button class="btn btn-primary" disabled="@(!IsConnected)" @onclick="IncrementCount">Click me</button>
+<ul id="messagesList">
+    @foreach (var message in messages)
+    {
+        <li>@message</li>
+    }
+</ul>
 
 @code {
     private int currentCount = 0;
+    private List<string> messages = new List<string>();
     private HubConnection? hubConnection;
 
     protected override async Task OnInitializedAsync()
@@ -21,18 +28,16 @@
             .WithUrl(NavigationManager.ToAbsoluteUri("/counterhub"))
             .Build();
 
+        hubConnection.On<string>("IncrementCounter", (message) =>
+        {
+            currentCount++;
+            messages.Add(message);
+            InvokeAsync(StateHasChanged);
+        });
+
         await hubConnection.StartAsync();
     }
 
-    private async Task IncrementCount()
-    {
-        currentCount++;
-        if (hubConnection is not null)
-            {
-                await hubConnection.SendAsync("IncrementCounter");
-            }
-    }
-    
     public bool IsConnected =>
         hubConnection?.State == HubConnectionState.Connected;
 

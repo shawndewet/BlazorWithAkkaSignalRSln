@@ -26,6 +26,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.MapBlazorHub();
+app.MapHub<BlazorWithAkkaSignalR.Hubs.CounterHub>("/counterhub");
 app.MapFallbackToPage("/_Host");
 
 app.Run();
